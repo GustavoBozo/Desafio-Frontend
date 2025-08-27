@@ -1,55 +1,84 @@
-
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Input, CloseButton } from '@mantine/core';
 
 function PrimeiraEtapa({validar, indice}) {
-    const [email, setEmail] = useState('');
-    const [senha, setSenha] = useState(''); 
-    const [confirmar, setConfirmar] = useState('');
+    
+    const deveSalvar = useRef(true); // Nossa bandeira. Começa como true.
+
+    const [campos, setCampos] = useState(() => {
+        const dadosSalvos = localStorage.getItem("PrimeiraEtapa")
+        if(dadosSalvos) {
+            return JSON.parse(dadosSalvos)
+        } else {
+            return {
+                email: '',
+                senha: '',
+                confirmar: ''
+            }
+        }
+    }) 
+
+    
 
 
     const [erroSenha, setErroSenha] = useState('');
+    const [emailError, setEmailError] = useState('');
 
 
     useEffect(() => {
-        const emailValido = email.includes('@')
-        const senhaValida = senha.trim() !== ""
-        const confirmarSenha = confirmar.trim() === senha.trim()
+        const emailValido = campos.email.includes('@')
+        const senhaValida = campos.senha.trim() !== ""
+        const confirmarSenha = campos.confirmar.trim() === campos.senha.trim()
 
         const formularioValido = emailValido && senhaValida && confirmarSenha
 
         if(validar){
-            validar(indice, formularioValido,)
+            validar(indice, formularioValido)
         }
 
-    }, [email, senha, confirmar, validar, indice])
+        
+        
+       
+        localStorage.setItem("PrimeiraEtapa", JSON.stringify(campos));
+            
 
+    }, [campos, validar, indice])
 
+    
     useEffect(() => {
         
-        if(confirmar && senha !== confirmar) {
+        if(campos.confirmar && campos.senha !== campos.confirmar) {
             setErroSenha("Senhas não são iguais")
         } else {
             setErroSenha('')
         }
 
-    }, [senha, confirmar])
+        if(!campos.email.includes('@')){
+            setEmailError("Email deve conter @")
+        } else {
+            setErroSenha('')
+        }
+
+    }, [campos])
 
     return (
         <>
-            <Input.Wrapper label="Email">
+            <Input.Wrapper label="Email" error={emailError}>
                 <Input
                     placeholder="Email"
-                    value={email}
-                    onChange={(event) => setEmail(event.currentTarget.value)}
+                    value={campos.email}
+                    onChange={(event) => {
+                        const value = event.currentTarget.value
+                        setCampos((prev => ({...prev, email: value})))}
+                    } 
+                    required
                     rightSectionPointerEvents="all"
                     mt="md"
                     rightSection={
                     <CloseButton
                         aria-label="Clear input"
-                        onClick={() => setEmail('')}
-                        style={{ display: email ? undefined : 'none' }}
+                        onClick={() => setCampos(prev => ({...prev, email: ''}))}
+                        style={{ display: campos.email ? undefined : 'none' }}
                     />
                     }
                 />
@@ -58,15 +87,18 @@ function PrimeiraEtapa({validar, indice}) {
             <Input.Wrapper label="Senha">
                 <Input
                     placeholder="Senha"
-                    value={senha}
-                    onChange={(event) => setSenha(event.currentTarget.value)}
+                    value={campos.senha}
+                    onChange={(event) => {
+                        const value = event.currentTarget.value
+                        setCampos((prev => ({...prev, senha: value})))}
+                    } 
                     rightSectionPointerEvents="all"
                     mt="md"
                     rightSection={
                     <CloseButton
                         aria-label="Clear input"
-                        onClick={() => setEmail('')}
-                        style={{ display: senha ? undefined : 'none' }}
+                        onClick={() => setCampos(prev => ({...prev, senha: ''}))}
+                        style={{ display: campos.senha ? undefined : 'none' }}
                     />
                     }
                 />
@@ -75,16 +107,18 @@ function PrimeiraEtapa({validar, indice}) {
             <Input.Wrapper label="Confirmar Senha" error={erroSenha}>
                 <Input
                     placeholder="Confirmar Senha"
-                    value={confirmar}
-                    onChange={(event) => setConfirmar(event.currentTarget.value)}
-                    
+                    value={campos.confirmar}
+                    onChange={(event) => {
+                        const value = event.currentTarget.value
+                        setCampos((prev => ({...prev, confirmar: value})))}
+                    } 
                     rightSectionPointerEvents="all"
                     mt="md"
                     rightSection={
                     <CloseButton
                         aria-label="Clear input"
-                        onClick={() => setConfirmar('')}
-                        style={{ display: confirmar ? undefined : 'none' }}
+                        onClick={() => setCampos(prev => ({...prev, confirm: ''}))}
+                        style={{ display: campos.confirmar ? undefined : 'none' }}
                     />
                     }
                 />

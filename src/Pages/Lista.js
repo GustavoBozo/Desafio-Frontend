@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Accordion } from '@mantine/core';
-
+import "./Lista.css"
 
 function ListaGatos() {
 
@@ -34,9 +34,9 @@ function ListaGatos() {
         
         return(
 
-            <Accordion.Item key={item} value={item}>
-                <Accordion.Control>{item}</Accordion.Control>
-                <Accordion.Panel>
+            <Accordion.Item key={item} value={item} className="accordion">
+                <Accordion.Control className="control">{item}</Accordion.Control>
+                <Accordion.Panel className="accordion-content">
                     {gatos.map((gato) => (
 
                         <div key={gato.id}>
@@ -51,7 +51,7 @@ function ListaGatos() {
     });
 
     return (
-        <Accordion>
+        <Accordion className="teste">
             {items}
         </Accordion>    
     );

@@ -1,40 +1,68 @@
 import React, { useEffect, useState } from "react";
 import { DateInput } from '@mantine/dates';
 import { Input, CloseButton } from '@mantine/core';
+import '@mantine/dates/styles.css';
 
-function SegundaEtapa({validar, indice}) {
-    const [nome, setNome] = useState('');
-    const [sobrenome, setSobrenome] = useState('');
-    const [data, setData] = useState<string  | null>(null);
+function SegundaEtapa({validar2, indice}) {
 
+    const [campos, setCampos] = useState(() => {
+        const dadosSalvos = localStorage.getItem("SegundaEtapa")
+        if(dadosSalvos) {
+            const dados =  JSON.parse(dadosSalvos)
+            
+            return {
+                ...dados,
+                data: dados.data ? new Date(dados.data) : null,
+            }
+        } else {
+            return {
+                nome: '',
+                sobrenome: '',
+                data: null
+            }
+        }
+    }) 
 
     useEffect(() => {
-        const nomeValido = nome.trim() !== ""
-        const sobrenomeValido = sobrenome.trim() !== ""
-        const dataValida = data.trim() !== ""
+        const nomeValido = campos.nome.trim() !== ""
+        const sobrenomeValido = campos.sobrenome.trim() !== ""
+        const dataValida = campos.data !== null
 
         const formularioValido = nomeValido && sobrenomeValido && dataValida
 
-        if(validar){
-            validar(indice, formularioValido)
+        if(validar2){
+            validar2(indice, formularioValido)
         }
+
+        
+
+        localStorage.setItem("SegundaEtapa", JSON.stringify(campos));
+        
     
-    }, [nome, sobrenome, data, validar, indice])
+    }, [campos, validar2, indice])
+
+    const handleData = (novaData) => {
+        setCampos(prev => ({ ...prev, data: novaData }));
+    }
+    
 
     return (
         <>
             <Input.Wrapper label="Nome">
                 <Input
                 placeholder="Nome"
-                value={nome}
-                onChange={(event) => setNome(event.currentTarget.value)}
+                value={campos.nome}
+                    onChange={(event) => {
+                        const value = event.currentTarget.value
+                        setCampos((prev => ({...prev, nome: value})))}
+                    } 
                 rightSectionPointerEvents="all"
                 mt="md"
                 rightSection={
                     <CloseButton
                     aria-label="Clear input"
-                    onClick={() => setNome('')}
-                    style={{ display: nome ? undefined : 'none' }}
+                    onClick={() => setCampos(prev => ({...prev, nome: ''}))}
+                    style={{ display: campos.nome ? undefined : 'none' }}
                     />
                     }
                 />
@@ -44,25 +72,29 @@ function SegundaEtapa({validar, indice}) {
             <Input.Wrapper label="Sobrenome">
                 <Input
                 placeholder="Sobrenome"
-                value={sobrenome}
-                onChange={(event) => setSobrenome(event.currentTarget.value)}
+                value={campos.sobrenome}
+                onChange={(event) => {
+                    const value = event.currentTarget.value
+                    setCampos((prev => ({...prev, sobrenome: value})))}
+                } 
                 rightSectionPointerEvents="all"
                 mt="md"
                 rightSection={
                     <CloseButton
                     aria-label="Clear input"
-                    onClick={() => setSobrenome('')}
-                    style={{ display: sobrenome ? undefined : 'none' }}
+                    onClick={() => setCampos(prev => ({...prev, sobrenome: ''}))}
+                    style={{ display: campos.sobrenome ? undefined : 'none' }}
                     />
                     }
                 />
             </Input.Wrapper>
 
             <DateInput
-                value={data}
-                onChange={setData}
-                label="Date input"
-                placeholder="Date input"
+                value={campos.data}
+                onChange={handleData}
+                valueFormat="DD-MM-YYYY" 
+                label="Data de Nascimento"
+                placeholder="Data de Nascimento"
             />
         </>
     )
